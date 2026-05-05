@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Health Tracker</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(120deg, #0f2027, #203a43, #2c5364);
+  color: #fff;
+}
+
+header {
+  text-align: center;
+  padding: 25px;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.container {
+  max-width: 1000px;
+  margin: auto;
+  padding: 20px;
+}
+
+.card {
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(15px);
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+h2 { margin-top: 0; }
+
+input, select {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 10px;
+  border: none;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #00c6ff, #0072ff);
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.stat {
+  text-align: center;
+  padding: 15px;
+  border-radius: 15px;
+  background: rgba(255,255,255,0.1);
+}
+
+.log {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.delete {
+  color: red;
+  cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<header>🏋️ Health Tracker (Premium UI)</header>
+
+<div class="container">
+
+<div class="card">
+  <h2>Add Health Data</h2>
+  <input type="date" id="date">
+  <input type="number" id="steps" placeholder="Steps">
+  <input type="number" id="water" placeholder="Water (liters)">
+  <input type="number" id="sleep" placeholder="Sleep (hours)">
+  <button onclick="addData()">Save</button>
+</div>
+
+<div class="card">
+  <h2>Summary</h2>
+  <div class="grid">
+    <div class="stat">Steps<br><span id="totalSteps">0</span></div>
+    <div class="stat">Water<br><span id="totalWater">0</span> L</div>
+    <div class="stat">Sleep<br><span id="totalSleep">0</span> hrs</div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Daily Logs</h2>
+  <div id="logs"></div>
+</div>
+
+</div>
+
+<script>
+let data = JSON.parse(localStorage.getItem('healthData')) || [];
+
+function updateUI() {
+  let totalSteps = 0, totalWater = 0, totalSleep = 0;
+  const logs = document.getElementById('logs');
+  logs.innerHTML = '';
+
+  data.forEach((d, index) => {
+    totalSteps += d.steps;
+    totalWater += d.water;
+    totalSleep += d.sleep;
+
+    logs.innerHTML += `
+      <div class="log">
+        <div>
+          ${d.date} | ${d.steps} steps | ${d.water}L | ${d.sleep}h
+        </div>
+        <div class="delete" onclick="deleteData(${index})">Delete</div>
+      </div>
+    `;
+  });
+
+  document.getElementById('totalSteps').innerText = totalSteps;
+  document.getElementById('totalWater').innerText = totalWater.toFixed(1);
+  document.getElementById('totalSleep').innerText = totalSleep.toFixed(1);
+}
+
+function addData() {
+  const date = document.getElementById('date').value;
+  const steps = parseInt(document.getElementById('steps').value);
+  const water = parseFloat(document.getElementById('water').value);
+  const sleep = parseFloat(document.getElementById('sleep').value);
+
+  if (!date || !steps || !water || !sleep) {
+    alert('Fill all fields');
+    return;
+  }
+
+  data.push({ date, steps, water, sleep });
+  localStorage.setItem('healthData', JSON.stringify(data));
+
+  document.getElementById('date').value = '';
+  document.getElementById('steps').value = '';
+  document.getElementById('water').value = '';
+  document.getElementById('sleep').value = '';
+
+  updateUI();
+}
+
+function deleteData(index) {
+  data.splice(index, 1);
+  localStorage.setItem('healthData', JSON.stringify(data));
+  updateUI();
+}
+
+updateUI();
+</script>
+
+</body>
+</html>
